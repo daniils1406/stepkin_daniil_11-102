@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Результаты для: "{{ query }}"</h1>
+        <ul>
+            {% for doc_id, score, link in results %}
+                <li>
+                    <strong>Документ {{ doc_id }}:</strong> <a href="{{ link }}" target="_blank">{{ link }}</a>
+                    (Рейтинг: {{ score|round(4) }})
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="/">Новый поиск</a>
+    </div>
+</body>
+</html>
