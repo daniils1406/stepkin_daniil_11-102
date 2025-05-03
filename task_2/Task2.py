@@ -57,17 +57,34 @@ word_pattern = re.compile("^[а-яА-ЯёЁ]+$")
 
 tokens_set = set()
 
-# --- ЭТАП 1: Токенизация ---
+# --- ЭТАП 1: Токенизация и чистка ---
 for filepath in FILES:
     with open(filepath, encoding="utf-8") as f:
         soup = BeautifulSoup(f, "html.parser")
-        text = soup.get_text()
+
+        # Пробуем извлечь только тело статьи
+        article_body = soup.find("div", class_="tm-article-body")
+        if article_body:
+            text = article_body.get_text(separator=" ")
+        else:
+            text = soup.get_text(separator=" ")
 
     words = word_tokenize(text.lower())
 
     for word in words:
-        if word_pattern.match(word) and word not in russian_stopwords:
+        if (
+            word_pattern.match(word)
+            and word not in russian_stopwords
+            and 2 <= len(word) <= 20  # Ограничение по длине
+        ):
+            # Простая эвристика для удаления склеенных слов: если в слове 3+ корня
+            # (повтор одного и того же слова), то пропускаем
+            halves = re.split(r'(?:[а-яё]{3,})', word)
+            if len(halves) > 4:  # подозрительно длинное и многосоставное
+                continue
+
             tokens_set.add(word)
+
 
 # Сортируем для читаемости
 tokens_list = sorted(tokens_set)
